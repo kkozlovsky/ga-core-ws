@@ -9,8 +9,6 @@ import ga.core.web.exception.ClientNotFoundException;
 import ga.core.web.exception.TechnicalErrorException;
 import ga.core.web.exception.WrongPasswordException;
 import ga.core.web.repository.ClientRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +18,6 @@ import java.util.List;
 @Service
 public class ClientService {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static final String LOGIN_PARAM = "login";
 	private static final String PASSWORD_PARAM = "password";
 	private static final String BALANCE_PARAM = "balance";
@@ -40,7 +37,6 @@ public class ClientService {
 		if (client != null) {
 			return SUCCESS_REGISTRATION_RESPONSE;
 		} else {
-			logger.error(login + " registration failed");
 			throw new TechnicalErrorException(login + ": registration failed");
 		}
 	}
@@ -51,11 +47,9 @@ public class ClientService {
 		String password = resolveParam(requestDto.getExtras(), PASSWORD_PARAM);
 		Client client = repository.findByLogin(login);
 		if (client == null) {
-			logger.error(login + ": not found");
 			throw new ClientNotFoundException(login + ": not found");
 		}
 		if (!client.getPassword().equals(password)) {
-			logger.error(client.getLogin() + ": wrong password");
 			throw new WrongPasswordException(client.getLogin() + ": wrong password");
 		}
 
@@ -70,7 +64,6 @@ public class ClientService {
 
 	private String resolveParam(List<Extra> extraParams, String paramName) {
 		if (extraParams == null) {
-			logger.error("extraParams not found");
 			throw new TechnicalErrorException("extraParams not found");
 		}
 		Extra extraParam = extraParams
@@ -80,7 +73,6 @@ public class ClientService {
 				.orElseThrow((() -> new TechnicalErrorException(paramName + " param not found")));
 
 		if (extraParam.getValue().isEmpty()) {
-			logger.error(paramName + " value not found");
 			throw new TechnicalErrorException(paramName + " value not found");
 		}
 

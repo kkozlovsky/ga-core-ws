@@ -2,8 +2,6 @@ package ga.core.web.repository;
 
 import ga.core.web.domain.Client;
 import ga.core.web.exception.ClientAlreadyRegisterException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,8 +16,6 @@ import java.util.Map;
 
 @Repository
 public class ClientRepository {
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private static final String SQL_INSERT = "INSERT INTO clients (login, password, balance) VALUES (:login, :password, :balance)";
 	private static final String SQL_QUERY_FIND_BY_LOGIN = "SELECT login, password, balance FROM clients WHERE login= :login";
@@ -43,9 +39,9 @@ public class ClientRepository {
 	}
 
 	public Client createClient(Client client) {
+//		Эту проверку можно убрать, если есть гарантия, что коллизий будет немного и просто ловить уникальность логина
 		Client existingClient = findByLogin(client.getLogin());
 		if (existingClient != null) {
-			logger.error(client.getLogin() + " already exist");
 			throw new ClientAlreadyRegisterException(client.getLogin() + " already exist");
 		}
 		Map<String, Object> namedParameters = new HashMap<>();
@@ -55,7 +51,6 @@ public class ClientRepository {
 		try {
 			jdbcTemplate.update(SQL_INSERT, namedParameters);
 		} catch (DataIntegrityViolationException exception) {
-			logger.error(client.getLogin() + " already exist");
 			throw new ClientAlreadyRegisterException(client.getLogin() + " already exist");
 		}
 
